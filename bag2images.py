@@ -65,6 +65,8 @@ def merge_images(images, sizes):
 def write_frames(bag, outdir, topics, sizes, start_time=rospy.Time(0),
                  stop_time=rospy.Time(sys.maxsize), viz=False,
                  encoding='bgr8', skip=1, count=0):
+    if not os.path.isdir(outdir):
+        os.mkdir(outdir)
     bridge = CvBridge()
     convert = {topics[i]: i for i in range(len(topics))}
 
