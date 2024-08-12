@@ -136,7 +136,7 @@ if __name__ == '__main__':
                         help='Logging level. Default INFO.')
     
     parser.add_argument('--thumbnail', default=False, type=bool,
-                       help='Generate thumbnail? Default False.')
+                       help='Generate a 4x4 thumbnail collage instead. Default False.')
 
     args = parser.parse_args()
 
