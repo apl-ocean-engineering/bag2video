@@ -77,6 +77,38 @@ def write_frames(bag, outdir, topics, sizes, start_time=rospy.Time(0),
         merged_image = merge_images(images, sizes)
         imageio.imwrite(outpath, merged_image)
 
+def create_thumbnail(bag, outdir, topics, sizes, start_time=rospy.Time(0),
+                             stop_time=rospy.Time(sys.maxsize), encoding='bgr8', collage_size=(4,4)):
+    bridge = CvBridge()
+    convert = { topics[i]:i for i in range(len(topics))}
+    selected_images = []
+
+    iterator = bag.read_messages(topics=topics, start_time=start_time, end_time=stop_time)
+    total_frames = sum(1 for _ in bag.read_messages(topics=topics, start_time=start_time, end_time=stop_time))
+
+    step = max(1, total_frames // (collage_size[0] * collage_size[1]))
+
+    for i, (topic, msg, t) in enumerate(iterator):
+        if i % step == 0:
+            image = np.asarray(bridge.imgmsg_to_cv2(msg, encoding))
+            selected_images.append(image)
+            if len(selected_images) >= collage_size[0] * collage_size[1]:
+                break
+
+    if len(selected_images) < collage_size[0] * collage_size[1]:
+        logging.warning("Not enough images to fill the entire collage. The collage will contain empty spaces.")
+        selected_images += [np.zeros_like(selected_images[0])] * (collage_size[0] * collage_size[1] - len(selected_images))
+
+    # Resize images and create collage
+    collage_images = [cv2.resize(img, (sizes[0][0], sizes[0][1])) for img in selected_images]
+    rows = [cv2.hconcat(collage_images[i*collage_size[1]:(i+1)*collage_size[1]]) for i in range(collage_size[0])]
+    collage = cv2.vconcat(rows)
+
+    # Save the collage
+    thumbnail_path = outdir / "thumbnail_collage.png"
+    logging.info(f'Writing thumbnail collage to {thumbnail_path}')
+    cv2.imwrite(str(thumbnail_path), collage)
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Extract and encode images from bag files.')
     parser.add_argument('bagfile', help='Specifies the location of the bag file.')
@@ -102,6 +134,9 @@ if __name__ == '__main__':
 
     parser.add_argument('--log', '-l',action='store',default='INFO',
                         help='Logging level. Default INFO.')
+    
+    parser.add_argument('--thumbnail', default=False, type=bool,
+                       help='Generate thumbnail? Default False.')
 
     args = parser.parse_args()
 
@@ -143,7 +178,12 @@ if __name__ == '__main__':
         out_width, out_height = calc_out_size(sizes)
         logging.info('Resulting images of width %s and height %s.'%(out_width,out_height))
 
-        write_frames(bag=bag, outdir=args.outdir, topics=args.topics, sizes=sizes,
+        if not args.thumbnail:
+            write_frames(bag=bag, outdir=args.outdir, topics=args.topics, sizes=sizes,
                          start_time=start_time, stop_time=stop_time, encoding=args.encoding, skip=args.skip)
+        else: 
+            create_thumbnail(bag=bag, outdir=args.outdir, topics=args.topics, sizes=sizes,
+                         start_time=start_time, stop_time=stop_time, encoding=args.encoding)
+        
 
         logging.info('Done.')
