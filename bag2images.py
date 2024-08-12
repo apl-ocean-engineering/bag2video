@@ -78,9 +78,9 @@ def write_frames(bag, outdir, topics, sizes, start_time=rospy.Time(0),
         imageio.imwrite(outpath, merged_image)
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Extract and encode video from bag files.')
+    parser = argparse.ArgumentParser(description='Extract and encode images from bag files.')
     parser.add_argument('bagfile', help='Specifies the location of the bag file.')
-    parser.add_argument('topics', nargs='+',help='Image topics to merge in output video.')
+    parser.add_argument('topics', nargs='+',help='Image topics to merge in output directory.')
     parser.add_argument('--index', '-i', action='store',default=0, type=int,
                         help='Resizes all images to match the height of the topic specified. Default 0.')
     parser.add_argument('--scale', '-x', action='store',default=1, type=float,
@@ -136,12 +136,12 @@ if __name__ == '__main__':
         logging.info('Proccessing bag %s.'% bagfile)
         bag = rosbag.Bag(bagfile, 'r')
 
-        logging.info('Calculating video sizes.')
+        logging.info('Calculating image sizes.')
         sizes = get_sizes(bag, topics=args.topics, index=args.index,scale = args.scale, start_time=start_time, stop_time=stop_time)
 
         logging.info('Calculating final image size.')
         out_width, out_height = calc_out_size(sizes)
-        logging.info('Resulting video of width %s and height %s.'%(out_width,out_height))
+        logging.info('Resulting images of width %s and height %s.'%(out_width,out_height))
 
         write_frames(bag=bag, outdir=args.outdir, topics=args.topics, sizes=sizes,
                          start_time=start_time, stop_time=stop_time, encoding=args.encoding, skip=args.skip)
