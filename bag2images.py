@@ -50,43 +50,32 @@ def write_frames(bag, outdir, topics, sizes, start_time=rospy.Time(0),
                     stop_time=rospy.Time(sys.maxsize), viz=False, encoding='bgr8', skip=1):
     bridge = CvBridge()
     convert = { topics[i]:i for i in range(len(topics))}
-
     images = [np.zeros((sizes[i][1],sizes[i][0],3), np.uint8) for i in range(len(topics))]
     count = 0
 
     iterator = bag.read_messages(topics=topics, start_time=start_time, end_time=stop_time)
 
-    topic, msg, t = next(iterator)
-    image = np.asarray(bridge.imgmsg_to_cv2(msg, encoding))
-    images[convert[topic]] = image
-
     for topic, msg, t in iterator:
-
         time=t.to_sec()
-
         logging.debug('Topic %s updated at time %s seconds' % (topic, time ))
-
-        if (count % skip == 0):
-
-            # record the current information up to this point in time
-            logging.info('Writing image %s at time %.6f seconds.' % (count, time) )
-            merged_image = merge_images(images, sizes)
-
-            outpath = outdir / ( "image_%06d.png" % count )
-            logging.debug("Writing %s" % outpath)
-            imageio.imwrite( outpath, merged_image )
-
-        count += 1
 
         image = np.asarray(bridge.imgmsg_to_cv2(msg, encoding))
         images[convert[topic]] = image
 
-    merged_image = merge_images(images, sizes)
+        if count % skip == 0:
+            logging.info('Writing image %s at time %.6f seconds.' % (count, time) )
+            outpath = outdir / ( "image_%06d.png" % count )
+            logging.debug("Writing %s" % outpath)
+            merged_image = merge_images(images, sizes)
+            imageio.imwrite( outpath, merged_image )
 
-    outpath = outdir / ( "image_%06d.png" % count )
-    logging.debug("Writing %s" % outpath)
-    imageio.imwrite( outpath, merged_image )
-
+        count += 1
+    # Write the last frame if it was skipped in the last loop
+    if count % skip != 0:
+        outpath = outdir / ("image_%06d.png" % count)
+        logging.debug("Writing %s" % outpath)
+        merged_image = merge_images(images, sizes)
+        imageio.imwrite(outpath, merged_image)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Extract and encode video from bag files.')
