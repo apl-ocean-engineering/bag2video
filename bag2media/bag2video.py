@@ -13,8 +13,8 @@ import cv2
 import logging
 import imageio
 
-import bag2video
-from bag2video import sec_to_ns, stamp_to_sec
+import bag2media
+from utils import sec_to_ns, stamp_to_sec
 
 
 def write_frames(
