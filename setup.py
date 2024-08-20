@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="bag2video", # Replace with your own username
+    name="bag2video",
     version="0.0.1",
     author="Aaron Marburg",
     author_email="amarburg@uw.edu",
@@ -20,10 +20,11 @@ setuptools.setup(
     ],
     python_requires='>=3.6',
     scripts=['bag2video.py', 'bag2images.py'],
-    install_requires=['pillow','imageio','imageio-ffmpeg']
-    # entry_points={
-    # 'console_scripts': [
-    #     'sample=sample:main',
-    # ],
-    # },
+    install_requires=['numpy', 'opencv-python', 'imageio', 'rosbags', 'rosbags-image'],
+    entry_points={
+    'console_scripts': [
+        'bag2video=bag2video:main', 
+        'bag2images=bag2images:main'
+    ],
+    }
 )

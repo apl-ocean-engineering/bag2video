@@ -109,7 +109,7 @@ def create_thumbnail(bag, outdir, topics, sizes, start_time=rospy.Time(0),
     logging.info(f'Writing thumbnail collage to {thumbnail_path}')
     cv2.imwrite(str(thumbnail_path), collage)
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser(description='Extract and encode images from bag files.')
     parser.add_argument('bagfile', help='Specifies the location of the bag file.')
     parser.add_argument('topics', nargs='+',help='Image topics to merge in output directory.')
@@ -187,3 +187,6 @@ if __name__ == '__main__':
         
 
         logging.info('Done.')
+
+if __name__ == '__main__':
+    main()
