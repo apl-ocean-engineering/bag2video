@@ -1,4 +1,4 @@
-> **WARNING** 
+> **WARNING**
 > This repo (as a fork of [OSURobotics/bag2video](https://github.com/OSUrobotics/bag2video)) has wandered a long way from the original and is no longer really a fork.  It is now deprecated.
 
 > Active development here:  [rosbags2video](https://github.com/apl-ocean-engineering/rosbags2video).
